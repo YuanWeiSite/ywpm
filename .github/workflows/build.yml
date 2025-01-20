@@ -72,8 +72,10 @@ jobs:
 
       - name: Install dependencies (macOS)
         run: |
+          # Ensure OpenSSL is linked correctly
           brew install pkg-config openssl@1.1 || true
-          brew link --force openssl@1.1 || true
+          brew unlink openssl@3 || true
+          brew link --overwrite openssl@1.1 || true
 
       - name: Build the project
         run: cargo build --release
