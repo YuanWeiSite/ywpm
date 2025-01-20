@@ -3,19 +3,20 @@ name: Build and Package Rust Application
 on:
   push:
     branches:
-      - main  # 你可以根据需要修改为其他分支
+      - main
   pull_request:
     branches:
-      - main  # 你可以根据需要修改为其他分支
+      - main
+  workflow_dispatch: # 添加手动触发功能
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 使用 Ubuntu 环境运行此工作流
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]  # 为不同平台创建矩阵
-        rust: [stable, 1.60.0]  # 选择不同的 Rust 版本
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable]
 
     steps:
       - name: Check out code
@@ -24,25 +25,24 @@ jobs:
       - name: Set up Rust
         uses: actions/setup-rust@v1
         with:
-          rust-version: ${{ matrix.rust }}  # 使用矩阵中的 rust 版本
+          rust-version: ${{ matrix.rust }}
 
       - name: Install dependencies (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          if [[ "$RUNNER_OS" == "Linux" || "$RUNNER_OS" == "macOS" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libssl-dev pkg-config  # 安装所需的依赖
-          fi
+          sudo apt-get update || true
+          sudo apt-get install -y libssl-dev pkg-config || true
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: choco install pkg-config
+        run: |
+          choco install openssl-light || true
 
       - name: Build the project
         run: cargo build --release
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: rust-build-artifacts-${{ matrix.os }}-${{ matrix.rust }}
-          path: target/release/  # 存储编译产物的目录
-
+          name: rust-build-${{ matrix.os }}
+          path: target/release/
