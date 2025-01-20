@@ -1,0 +1,48 @@
+name: Build and Package Rust Application
+
+on:
+  push:
+    branches:
+      - main  # 你可以根据需要修改为其他分支
+  pull_request:
+    branches:
+      - main  # 你可以根据需要修改为其他分支
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # 使用 Ubuntu 环境运行此工作流
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]  # 为不同平台创建矩阵
+        rust: [stable, 1.60.0]  # 选择不同的 Rust 版本
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: ${{ matrix.rust }}  # 使用矩阵中的 rust 版本
+
+      - name: Install dependencies (Linux/macOS)
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" || "$RUNNER_OS" == "macOS" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y libssl-dev pkg-config  # 安装所需的依赖
+          fi
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: choco install pkg-config
+
+      - name: Build the project
+        run: cargo build --release
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: rust-build-artifacts-${{ matrix.os }}-${{ matrix.rust }}
+          path: target/release/  # 存储编译产物的目录
+
