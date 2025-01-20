@@ -20,19 +20,17 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          profile: minimal
 
       - name: Install dependencies (Linux)
         run: |
           sudo apt-get update || true
           sudo apt-get install -y libssl-dev pkg-config || true
-
+          
       - name: Build the project
         run: cargo build --release
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rust-build-linux
           path: target/release/
@@ -47,8 +45,6 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          profile: minimal
 
       - name: Install dependencies (Windows)
         run: |
@@ -58,7 +54,7 @@ jobs:
         run: cargo build --release
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rust-build-windows
           path: target/release/
@@ -73,18 +69,17 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          profile: minimal
 
       - name: Install dependencies (macOS)
         run: |
-          brew install pkg-config libssl || true
+          brew install pkg-config openssl@1.1 || true
+          brew link --force openssl@1.1 || true
 
       - name: Build the project
         run: cargo build --release
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rust-build-macos
           path: target/release/
