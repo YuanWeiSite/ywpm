@@ -12,7 +12,7 @@ on:
 jobs:
   build-linux:
     name: Build on Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out code
@@ -69,13 +69,6 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Install dependencies (macOS)
-        run: |
-          # Ensure OpenSSL is linked correctly
-          brew install pkg-config openssl@1.1 || true
-          brew unlink openssl@3 || true
-          brew link --overwrite openssl@1.1 || true
 
       - name: Build the project
         run: cargo build --release
